@@ -1,7 +1,10 @@
 package com.internproject.studentms.controller;
 
-import com.internproject.studentms.entity.Course;
+import com.internproject.studentms.dto.CourseDTO;
 import com.internproject.studentms.service.CourseService;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,29 +21,29 @@ public class CourseController {
     }
 
     @PostMapping
-    public Course create(@RequestBody Course course) {
-        return service.save(course);
+    public ResponseEntity<CourseDTO> create(@Valid @RequestBody CourseDTO courseDTO) {
+        CourseDTO createdCourse = service.save(courseDTO);
+        return new ResponseEntity<>(createdCourse, HttpStatus.CREATED);
     }
 
     @GetMapping
-    public List<Course> getAll() {
-        return service.getAll();
+    public ResponseEntity<List<CourseDTO>> getAll() {
+        return ResponseEntity.ok(service.getAll());
     }
 
     @GetMapping("/{id}")
-    public Course getById(@PathVariable Long id) {
-        return service.getById(id).orElse(null);
+    public ResponseEntity<CourseDTO> getById(@PathVariable Long id) {
+        return ResponseEntity.ok(service.getById(id));
     }
 
     @PutMapping("/{id}")
-    public Course update(@PathVariable Long id,
-                         @RequestBody Course course) {
-        return service.update(id, course);
+    public ResponseEntity<CourseDTO> update(@PathVariable Long id, @Valid @RequestBody CourseDTO courseDTO) {
+        return ResponseEntity.ok(service.update(id, courseDTO));
     }
 
     @DeleteMapping("/{id}")
-    public String delete(@PathVariable Long id) {
+    public ResponseEntity<String> delete(@PathVariable Long id) {
         service.delete(id);
-        return "Course deleted";
+        return ResponseEntity.ok("Course deleted successfully");
     }
 }

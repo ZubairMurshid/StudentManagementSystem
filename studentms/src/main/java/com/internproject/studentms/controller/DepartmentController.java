@@ -1,7 +1,10 @@
 package com.internproject.studentms.controller;
 
-import com.internproject.studentms.entity.Department;
+import com.internproject.studentms.dto.DepartmentDTO;
 import com.internproject.studentms.service.DepartmentService;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,29 +21,29 @@ public class DepartmentController {
     }
 
     @PostMapping
-    public Department create(@RequestBody Department department) {
-        return service.save(department);
+    public ResponseEntity<DepartmentDTO> create(@Valid @RequestBody DepartmentDTO departmentDTO) {
+        DepartmentDTO createdDepartment = service.save(departmentDTO);
+        return new ResponseEntity<>(createdDepartment, HttpStatus.CREATED);
     }
 
     @GetMapping
-    public List<Department> getAll() {
-        return service.getAll();
+    public ResponseEntity<List<DepartmentDTO>> getAll() {
+        return ResponseEntity.ok(service.getAll());
     }
 
     @GetMapping("/{id}")
-    public Department getById(@PathVariable Long id) {
-        return service.getById(id).orElse(null);
+    public ResponseEntity<DepartmentDTO> getById(@PathVariable Long id) {
+        return ResponseEntity.ok(service.getById(id));
     }
 
     @PutMapping("/{id}")
-    public Department update(@PathVariable Long id,
-                             @RequestBody Department department) {
-        return service.update(id, department);
+    public ResponseEntity<DepartmentDTO> update(@PathVariable Long id, @Valid @RequestBody DepartmentDTO departmentDTO) {
+        return ResponseEntity.ok(service.update(id, departmentDTO));
     }
 
     @DeleteMapping("/{id}")
-    public String delete(@PathVariable Long id) {
+    public ResponseEntity<String> delete(@PathVariable Long id) {
         service.delete(id);
-        return "Department deleted";
+        return ResponseEntity.ok("Department deleted successfully");
     }
 }

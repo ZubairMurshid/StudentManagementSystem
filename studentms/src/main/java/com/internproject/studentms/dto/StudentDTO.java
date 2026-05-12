@@ -1,46 +1,36 @@
-package com.internproject.studentms.entity;
+package com.internproject.studentms.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Pattern;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.util.List;
 
-@Entity
-@Table(name = "students")
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Student {
+public class StudentDTO {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotBlank(message = "First name is required")
-    @Column(nullable = false)
     private String firstName;
 
     @NotBlank(message = "Last name is required")
-    @Column(nullable = false)
     private String lastName;
 
     @NotBlank(message = "Email is required")
     @Email(message = "Invalid email format")
-    @Column(unique = true, nullable = false)
     private String email;
 
     @Past(message = "Date of birth must be in the past")
     private LocalDate dob;
 
     @NotBlank(message = "Gender is required")
-    @Column(nullable = false)
     private String gender;
 
     @Pattern(regexp = "^\\d{10}$", message = "Phone number must be 10 digits")
@@ -48,11 +38,5 @@ public class Student {
 
     private String address;
 
-    @ManyToOne
-    @JoinColumn(name = "department_id")
-    private Department department;
-
-    @JsonIgnore
-    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
-    private List<Enrollment> enrollments;
+    private Long departmentId;
 }

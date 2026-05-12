@@ -1,44 +1,70 @@
 package com.internproject.studentms.service;
 
+import com.internproject.studentms.dto.DepartmentDTO;
 import com.internproject.studentms.entity.Department;
+import com.internproject.studentms.exception.ResourceNotFoundException;
 import com.internproject.studentms.repository.DepartmentRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class DepartmentService {
 
-    private final DepartmentRepository repo;
+    private final DepartmentRepository departmentRepository;
 
-    public DepartmentService(DepartmentRepository repo) {
-        this.repo = repo;
+    public DepartmentService(DepartmentRepository departmentRepository) {
+        this.departmentRepository = departmentRepository;
     }
 
-    public Department save(Department department) {
-        return repo.save(department);
+    public DepartmentDTO save(DepartmentDTO departmentDTO) {
+        Department department = mapToEntity(departmentDTO);
+        Department savedDepartment = departmentRepository.save(department);
+        return mapToDTO(savedDepartment);
     }
 
-    public List<Department> getAll() {
-        return repo.findAll();
+    public List<DepartmentDTO> getAll() {
+        return departmentRepository.findAll().stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
     }
 
-    public Optional<Department> getById(Long id) {
-        return repo.findById(id);
+    public DepartmentDTO getById(Long id) {
+        Department department = departmentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Department not found with id: " + id));
+        return mapToDTO(department);
     }
 
-    public Department update(Long id, Department updated) {
+    public DepartmentDTO update(Long id, DepartmentDTO updatedDTO) {
+        Department existingDepartment = departmentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Department not found with id: " + id));
 
-        Department d = repo.findById(id).orElseThrow();
+        existingDepartment.setDepartmentName(updatedDTO.getDepartmentName());
+        existingDepartment.setHodName(updatedDTO.getHodName());
 
-        d.setDepartmentName(updated.getDepartmentName());
-        d.setHodName(updated.getHodName());
-
-        return repo.save(d);
+        Department updatedDepartment = departmentRepository.save(existingDepartment);
+        return mapToDTO(updatedDepartment);
     }
 
     public void delete(Long id) {
-        repo.deleteById(id);
+        Department department = departmentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Department not found with id: " + id));
+        departmentRepository.delete(department);
+    }
+
+    private Department mapToEntity(DepartmentDTO dto) {
+        Department department = new Department();
+        department.setDepartmentName(dto.getDepartmentName());
+        department.setHodName(dto.getHodName());
+        return department;
+    }
+
+    private DepartmentDTO mapToDTO(Department department) {
+        DepartmentDTO dto = new DepartmentDTO();
+        dto.setId(department.getId());
+        dto.setDepartmentName(department.getDepartmentName());
+        dto.setHodName(department.getHodName());
+        return dto;
     }
 }

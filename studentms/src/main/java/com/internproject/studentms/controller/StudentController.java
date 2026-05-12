@@ -1,7 +1,10 @@
 package com.internproject.studentms.controller;
 
-import com.internproject.studentms.entity.Student;
+import com.internproject.studentms.dto.StudentDTO;
 import com.internproject.studentms.service.StudentService;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,28 +21,29 @@ public class StudentController {
     }
 
     @PostMapping
-    public Student create(@RequestBody Student student) {
-        return service.save(student);
+    public ResponseEntity<StudentDTO> create(@Valid @RequestBody StudentDTO studentDTO) {
+        StudentDTO createdStudent = service.save(studentDTO);
+        return new ResponseEntity<>(createdStudent, HttpStatus.CREATED);
     }
 
     @GetMapping
-    public List<Student> getAll() {
-        return service.getAll();
+    public ResponseEntity<List<StudentDTO>> getAll() {
+        return ResponseEntity.ok(service.getAll());
     }
 
     @GetMapping("/{id}")
-    public Student getById(@PathVariable Long id) {
-        return service.getById(id).orElse(null);
+    public ResponseEntity<StudentDTO> getById(@PathVariable Long id) {
+        return ResponseEntity.ok(service.getById(id));
     }
 
     @PutMapping("/{id}")
-    public Student update(@PathVariable Long id, @RequestBody Student student) {
-        return service.update(id, student);
+    public ResponseEntity<StudentDTO> update(@PathVariable Long id, @Valid @RequestBody StudentDTO studentDTO) {
+        return ResponseEntity.ok(service.update(id, studentDTO));
     }
 
     @DeleteMapping("/{id}")
-    public String delete(@PathVariable Long id) {
+    public ResponseEntity<String> delete(@PathVariable Long id) {
         service.delete(id);
-        return "Deleted successfully";
+        return ResponseEntity.ok("Student deleted successfully");
     }
 }

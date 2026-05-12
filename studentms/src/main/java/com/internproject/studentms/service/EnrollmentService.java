@@ -1,46 +1,114 @@
 package com.internproject.studentms.service;
 
+import com.internproject.studentms.dto.EnrollmentDTO;
+import com.internproject.studentms.entity.Course;
 import com.internproject.studentms.entity.Enrollment;
+import com.internproject.studentms.entity.Student;
+import com.internproject.studentms.exception.ResourceNotFoundException;
+import com.internproject.studentms.repository.CourseRepository;
 import com.internproject.studentms.repository.EnrollmentRepository;
+import com.internproject.studentms.repository.StudentRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class EnrollmentService {
 
-    private final EnrollmentRepository repo;
+    private final EnrollmentRepository enrollmentRepository;
+    private final StudentRepository studentRepository;
+    private final CourseRepository courseRepository;
 
-    public EnrollmentService(EnrollmentRepository repo) {
-        this.repo = repo;
+    public EnrollmentService(EnrollmentRepository enrollmentRepository,
+                             StudentRepository studentRepository,
+                             CourseRepository courseRepository) {
+        this.enrollmentRepository = enrollmentRepository;
+        this.studentRepository = studentRepository;
+        this.courseRepository = courseRepository;
     }
 
-    public Enrollment save(Enrollment enrollment) {
-        return repo.save(enrollment);
+    public EnrollmentDTO save(EnrollmentDTO enrollmentDTO) {
+        Enrollment enrollment = mapToEntity(enrollmentDTO);
+        Enrollment savedEnrollment = enrollmentRepository.save(enrollment);
+        return mapToDTO(savedEnrollment);
     }
 
-    public List<Enrollment> getAll() {
-        return repo.findAll();
+    public List<EnrollmentDTO> getAll() {
+        return enrollmentRepository.findAll().stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
     }
 
-    public Optional<Enrollment> getById(Long id) {
-        return repo.findById(id);
+    public EnrollmentDTO getById(Long id) {
+        Enrollment enrollment = enrollmentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Enrollment not found with id: " + id));
+        return mapToDTO(enrollment);
     }
 
-    public Enrollment update(Long id, Enrollment updated) {
+    public EnrollmentDTO update(Long id, EnrollmentDTO updatedDTO) {
+        Enrollment existingEnrollment = enrollmentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Enrollment not found with id: " + id));
 
-        Enrollment e = repo.findById(id).orElseThrow();
+        existingEnrollment.setSemester(updatedDTO.getSemester());
+        existingEnrollment.setGrade(updatedDTO.getGrade());
 
-        e.setSemester(updated.getSemester());
-        e.setGrade(updated.getGrade());
-        e.setStudent(updated.getStudent());
-        e.setCourse(updated.getCourse());
+        if (updatedDTO.getStudentId() != null) {
+            Student student = studentRepository.findById(updatedDTO.getStudentId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Student not found with id: " + updatedDTO.getStudentId()));
+            existingEnrollment.setStudent(student);
+        }
 
-        return repo.save(e);
+        if (updatedDTO.getCourseId() != null) {
+            Course course = courseRepository.findById(updatedDTO.getCourseId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + updatedDTO.getCourseId()));
+            existingEnrollment.setCourse(course);
+        }
+
+        Enrollment updatedEnrollment = enrollmentRepository.save(existingEnrollment);
+        return mapToDTO(updatedEnrollment);
     }
 
     public void delete(Long id) {
-        repo.deleteById(id);
+        Enrollment enrollment = enrollmentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Enrollment not found with id: " + id));
+        enrollmentRepository.delete(enrollment);
+    }
+
+    private Enrollment mapToEntity(EnrollmentDTO dto) {
+        Enrollment enrollment = new Enrollment();
+        enrollment.setSemester(dto.getSemester());
+        enrollment.setGrade(dto.getGrade());
+
+        if (dto.getStudentId() != null) {
+            Student student = studentRepository.findById(dto.getStudentId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Student not found with id: " + dto.getStudentId()));
+            enrollment.setStudent(student);
+        }
+
+        if (dto.getCourseId() != null) {
+            Course course = courseRepository.findById(dto.getCourseId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + dto.getCourseId()));
+            enrollment.setCourse(course);
+        }
+
+        return enrollment;
+    }
+
+    private EnrollmentDTO mapToDTO(Enrollment enrollment) {
+        EnrollmentDTO dto = new EnrollmentDTO();
+        dto.setId(enrollment.getId());
+        dto.setSemester(enrollment.getSemester());
+        dto.setGrade(enrollment.getGrade());
+
+        if (enrollment.getStudent() != null) {
+            dto.setStudentId(enrollment.getStudent().getId());
+        }
+
+        if (enrollment.getCourse() != null) {
+            dto.setCourseId(enrollment.getCourse().getId());
+        }
+
+        return dto;
     }
 }

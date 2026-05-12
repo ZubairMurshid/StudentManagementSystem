@@ -1,6 +1,10 @@
 package com.internproject.studentms.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.util.List;
@@ -17,13 +21,20 @@ public class Course {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "Course name is required")
+    @Column(nullable = false)
     private String courseName;
 
-    @Column(unique = true)
+    @NotBlank(message = "Course code is required")
+    @Column(unique = true, nullable = false)
     private String courseCode;
 
+    @NotNull(message = "Credits cannot be null")
+    @Min(value = 1, message = "Credits must be at least 1")
+    @Column(nullable = false)
     private Integer credits;
 
-    @OneToMany(mappedBy = "course")
+    @JsonIgnore
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL)
     private List<Enrollment> enrollments;
 }
