@@ -3,20 +3,35 @@ import {
   getStudents,
   createStudent,
   deleteStudent,
+  updateStudent,
 } from "../services/studentService";
+
+import { getDepartments } from "../services/departmentService";
+
+
 
 function Students() {
   const [students, setStudents] = useState([]);
+  const [editingId, setEditingId] = useState(null);
+
+  const [departments, setDepartments] = useState([]);
+
+  const fetchDepartments = async () => {
+    const response = await getDepartments(); // import this from departmentService
+    setDepartments(response.data);
+  };
 
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
     email: "",
     gender: "",
+    departmentId: "",
   });
 
   useEffect(() => {
     fetchStudents();
+    fetchDepartments();
   }, []);
 
   const fetchStudents = async () => {
@@ -31,10 +46,25 @@ function Students() {
     });
   };
 
+  const handleEdit = (student) => {
+    setEditingId(student.id);
+    setFormData({
+      firstName: student.firstName,
+      lastName: student.lastName,
+      email: student.email,
+      gender: student.gender,
+      departmentId: student.department?.id || "",
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    await createStudent(formData);
+    if (editingId) {
+      await updateStudent(editingId, formData);
+    } else {
+      await createStudent(formData);
+    }
 
     fetchStudents();
 
@@ -43,7 +73,10 @@ function Students() {
       lastName: "",
       email: "",
       gender: "",
+      departmentId: "",
     });
+
+    setEditingId(null);
   };
 
   const handleDelete = async (id) => {
@@ -88,7 +121,22 @@ function Students() {
           onChange={handleChange}
         />
 
-        <button type="submit">Add Student</button>
+        <select
+          name="departmentId"
+          value={formData.departmentId}
+          onChange={handleChange}
+        >
+          <option value="">Select Department</option>
+          {departments.map((dept) => (
+            <option key={dept.id} value={dept.id}>
+              {dept.departmentName}
+            </option>
+          ))}
+        </select>
+
+        <button type="submit">
+          {editingId ? "Update Student" : "Add Student"}
+        </button>
       </form>
 
       <hr />
@@ -100,6 +148,8 @@ function Students() {
           </p>
 
           <p>{student.email}</p>
+
+          <button onClick={() => handleEdit(student)}>Edit</button>
 
           <button onClick={() => handleDelete(student.id)}>Delete</button>
 
