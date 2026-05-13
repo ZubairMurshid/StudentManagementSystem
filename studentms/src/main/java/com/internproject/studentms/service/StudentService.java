@@ -99,6 +99,7 @@ public class StudentService {
 
         if (student.getDepartment() != null) {
             dto.setDepartmentId(student.getDepartment().getId());
+            dto.setDepartmentName(student.getDepartment().getDepartmentName());
         }
         return dto;
     }

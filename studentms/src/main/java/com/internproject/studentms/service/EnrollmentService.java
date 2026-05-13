@@ -98,17 +98,14 @@ public class EnrollmentService {
     private EnrollmentDTO mapToDTO(Enrollment enrollment) {
         EnrollmentDTO dto = new EnrollmentDTO();
         dto.setId(enrollment.getId());
+        dto.setStudentId(enrollment.getStudent().getId());
+        dto.setStudentName(enrollment.getStudent().getFirstName() + " " + enrollment.getStudent().getLastName());
+
+        dto.setCourseId(enrollment.getCourse().getId());
+        dto.setCourseName(enrollment.getCourse().getCourseName());
+
         dto.setSemester(enrollment.getSemester());
         dto.setGrade(enrollment.getGrade());
-
-        if (enrollment.getStudent() != null) {
-            dto.setStudentId(enrollment.getStudent().getId());
-        }
-
-        if (enrollment.getCourse() != null) {
-            dto.setCourseId(enrollment.getCourse().getId());
-        }
-
         return dto;
     }
 }

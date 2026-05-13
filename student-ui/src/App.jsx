@@ -1,6 +1,4 @@
-// src/App.jsx
 import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
-
 import Dashboard from "./pages/Dashboard";
 import Students from "./pages/Students";
 import Departments from "./pages/Departments";
@@ -10,31 +8,42 @@ import Courses from "./pages/Courses";
 function App() {
   return (
     <BrowserRouter>
-      {/* Simple Navigation */}
-      <nav style={{ padding: "10px", borderBottom: "1px solid #ccc" }}>
-        <Link to="/" style={{ marginRight: "15px" }}>
-          Dashboard
-        </Link>
-        <Link to="/students" style={{ marginRight: "15px" }}>
-          Students
-        </Link>
-        <Link to="/departments" style={{ marginRight: "15px" }}>
-          Departments
-        </Link>
-        <Link to="/enrollments" style={{ marginRight: "15px" }}>
-          Enrollments
-        </Link>
-        <Link to="/courses">Courses</Link>
-      </nav>
+      <div className="min-h-screen bg-gray-50 flex flex-col">
+        {/* Modern Navbar */}
+        <nav className="bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center sticky top-0 z-50">
+          <h1 className="text-xl font-bold text-blue-600 tracking-tight">
+            StudentMS
+          </h1>
+          <div className="flex gap-6">
+            {[
+              "Dashboard",
+              "Students",
+              "Departments",
+              "Enrollments",
+              "Courses",
+            ].map((item) => (
+              <Link
+                key={item}
+                to={item === "Dashboard" ? "/" : `/${item.toLowerCase()}`}
+                className="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors"
+              >
+                {item}
+              </Link>
+            ))}
+          </div>
+        </nav>
 
-      {/* Page Routing */}
-      <Routes>
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/students" element={<Students />} />
-        <Route path="/departments" element={<Departments />} />
-        <Route path="/enrollments" element={<Enrollments />} />
-        <Route path="/courses" element={<Courses />} />
-      </Routes>
+        {/* Main Application Area */}
+        <main className="flex-1 max-w-7xl mx-auto w-full p-6">
+          <Routes>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/students" element={<Students />} />
+            <Route path="/departments" element={<Departments />} />
+            <Route path="/enrollments" element={<Enrollments />} />
+            <Route path="/courses" element={<Courses />} />
+          </Routes>
+        </main>
+      </div>
     </BrowserRouter>
   );
 }

@@ -39,4 +39,6 @@ public class StudentDTO {
     private String address;
 
     private Long departmentId;
+
+    private String departmentName;
 }

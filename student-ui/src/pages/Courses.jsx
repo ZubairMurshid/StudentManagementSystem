@@ -1,6 +1,10 @@
 // src/pages/Courses.jsx
 import { useEffect, useState } from "react";
-import { getCourses, createCourse, deleteCourse } from "../services/courseService";
+import {
+  getCourses,
+  createCourse,
+  deleteCourse,
+} from "../services/courseService";
 
 function Courses() {
   const [courses, setCourses] = useState([]);
@@ -29,30 +33,33 @@ function Courses() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Submitting course:", formData);
 
-    if (!formData.courseName.trim() || !formData.courseCode.trim() || !formData.credits) {
+    // Destructure for cleaner code
+    const { courseName, courseCode, credits } = formData;
+
+    // Improved validation logic
+    if (
+      !courseName.trim() ||
+      !courseCode.trim() ||
+      credits === "" ||
+      credits === null
+    ) {
       alert("Please fill all fields");
       return;
     }
 
     try {
       const payload = {
-        courseName: formData.courseName.trim(),
-        courseCode: formData.courseCode.trim(),
-        credits: Number(formData.credits),
+        courseName: courseName.trim(),
+        courseCode: courseCode.trim(),
+        credits: Number(credits),
       };
 
       await createCourse(payload);
-      console.log("Course added successfully");
       fetchCourses();
       setFormData({ courseName: "", courseCode: "", credits: "" });
     } catch (error) {
-      if (error.response) {
-        console.error("Backend validation error:", error.response.data);
-      } else {
-        console.error(error);
-      }
+      console.error("Error submitting course:", error);
     }
   };
 
@@ -66,50 +73,95 @@ function Courses() {
   };
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h1>Courses</h1>
+    <div className="flex flex-col lg:flex-row gap-8">
+      {/* Sidebar: Entry Form */}
+      <aside className="w-full lg:w-1/3">
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 sticky top-24">
+          <h2 className="text-lg font-bold text-gray-800 mb-4">
+            Add New Course
+          </h2>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">
+                Course Name
+              </label>
+              <input
+                type="text"
+                name="courseName"
+                value={formData.courseName}
+                onChange={handleChange}
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                placeholder="e.g. Computer Science"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">
+                Course Code
+              </label>
+              <input
+                type="text"
+                name="courseCode"
+                value={formData.courseCode}
+                onChange={handleChange}
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
+                placeholder="CS101"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">
+                Credits
+              </label>
+              <input
+                type="number"
+                name="credits"
+                value={formData.credits}
+                onChange={handleChange}
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                placeholder="e.g. 3"
+              />
+            </div>
 
-      {/* Add Course Form */}
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          name="courseName"
-          placeholder="Course Name"
-          value={formData.courseName}
-          onChange={handleChange}
-        />
-
-        <input
-          type="text"
-          name="courseCode"
-          placeholder="Course Code"
-          value={formData.courseCode}
-          onChange={handleChange}
-        />
-
-        <input
-          type="number"
-          name="credits"
-          placeholder="Credits"
-          value={formData.credits}
-          onChange={handleChange}
-        />
-
-        <button type="submit">Add Course</button>
-      </form>
-
-      <hr />
-
-      {/* Course List */}
-      {courses.map((course) => (
-        <div key={course.id} style={{ marginBottom: "15px" }}>
-          <p>
-            {course.courseName} ({course.courseCode}) - {course.credits} credits
-          </p>
-          <button onClick={() => handleDelete(course.id)}>Delete</button>
-          <hr />
+            <button
+              type="submit"
+              className="w-full bg-blue-600 text-white font-bold py-2 rounded-lg hover:bg-blue-700 transition-colors shadow-md shadow-blue-100"
+            >
+              Create Course
+            </button>
+          </form>
         </div>
-      ))}
+      </aside>
+
+      {/* Main Content: Course List */}
+      <section className="flex-1">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold text-gray-900">
+            Available Courses
+          </h1>
+          <span className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-sm font-medium">
+            {courses.length} Total
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {courses.map((course) => (
+            <div
+              key={course.id}
+              className="bg-white p-5 rounded-xl border border-gray-200 hover:border-blue-300 transition-colors shadow-sm"
+            >
+              <h3 className="font-bold text-gray-800">{course.courseName}</h3>
+              <p className="text-sm text-gray-500">
+                {course.courseCode} • {course.credits} Credits
+              </p>
+              <button
+                onClick={() => handleDelete(course.id)}
+                className="mt-4 text-xs font-bold text-red-500 hover:text-red-700 transition-colors uppercase tracking-wider"
+              >
+                Delete Course
+              </button>
+            </div>
+          ))}
+        </div>
+      </section>
     </div>
   );
 }
