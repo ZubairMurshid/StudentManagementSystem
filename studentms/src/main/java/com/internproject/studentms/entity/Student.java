@@ -24,7 +24,7 @@ public class Student {
     private Long id;
 
     @NotBlank(message = "First name is required")
-    @Column(nullable = false)
+    @Column(name = "first_name") // Good practice when using @Column annotation
     private String firstName;
 
     @NotBlank(message = "Last name is required")
